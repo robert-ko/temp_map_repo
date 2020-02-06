@@ -10,8 +10,11 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
     // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
-	this->start_node = &(this->m_Model.FindClosestNode(start_x, start_y));
-  	this->end_node   = &(this->m_Model.FindClosestNode(end_x  , end_y));
+	//this->start_node = &(this->m_Model.FindClosestNode(start_x, start_y));
+  	//this->end_node   = &(this->m_Model.FindClosestNode(end_x  , end_y));
+	start_node = &(m_Model.FindClosestNode(start_x, start_y));
+  	end_node   = &(m_Model.FindClosestNode(end_x  , end_y));  
+  
 }
 
 
@@ -21,7 +24,7 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 // - Node objects have a distance method to determine the distance to another node.
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
-	return end_node->distance(*node);
+	return (float) end_node->distance(*node);
 }
 
 
@@ -36,11 +39,12 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 
     current_node->FindNeighbors();
   
-  	for (auto n : current_node->neighbors) {
-
+  	//for (auto n : current_node->neighbors) {
+	for (RouteModel::Node *n : current_node->neighbors) {
      	n->parent  = current_node;
         n->h_value = CalculateHValue(n);
-      	n->g_value = n->distance(*current_node);
+      	n->g_value = current_node->g_value + n->distance(*current_node);
+        //n->g_value = start_node->distance(*n);
       	n->visited = true;
 
       	this->open_list.push_back( n );
@@ -57,7 +61,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Remove that node from the open_list.
 // - Return the pointer.
 bool Compare(RouteModel::Node  *a, RouteModel::Node  *b) {
-      if ((a->g_value + a->h_value) > (b->g_value + b->h_value)) {
+      if ((float) (a->g_value + a->h_value) > (float) (b->g_value + b->h_value)) {
        	return true; 
       } else {
         return false;
@@ -65,8 +69,6 @@ bool Compare(RouteModel::Node  *a, RouteModel::Node  *b) {
 }
 
 RouteModel::Node *RoutePlanner::NextNode() {
-  
-  
   
 	std::sort(this->open_list.begin(), this->open_list.end(), Compare);
   	auto current = this->open_list.back();
