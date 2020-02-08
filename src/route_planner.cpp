@@ -20,7 +20,7 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
 // TODO 3: Implement the CalculateHValue method.
 // Tips:
-// - You can use the distance to the end_node for the h value.
+// - You can use the distaniterce to the end_node for the h value.
 // - Node objects have a distance method to determine the distance to another node.
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
@@ -39,12 +39,12 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 
     current_node->FindNeighbors();
   
-  	//for (auto n : current_node->neighbors) {
-	for (RouteModel::Node *n : current_node->neighbors) {
+  	for (auto n : current_node->neighbors) {
+
      	n->parent  = current_node;
         n->h_value = CalculateHValue(n);
       	n->g_value = current_node->g_value + n->distance(*current_node);
-        //n->g_value = start_node->distance(*n);
+
       	n->visited = true;
 
       	this->open_list.push_back( n );
@@ -118,27 +118,28 @@ void RoutePlanner::AStarSearch() {
     RouteModel::Node *current_node = nullptr;
 
     // TODO: Implement your solution here.
-    current_node = start_node;
-
-   // original solution
-   //while(current_node != end_node) {
-   //    AddNeighbors(current_node);
-   //  	current_node = NextNode();
-   //}
+  	current_node = start_node;
   
-    AddNeighbors(current_node);
-    
-   while(open_list.size() > 0) {
-     current_node = NextNode();
+  	open_list.push_back(current_node);
+    start_node->visited = true;
+    //AddNeighbors(current_node);
+  /*
+   	while(open_list.size() > 0) {
+      	current_node = NextNode();
       
-     if (current_node == end_node) {
-        //break;
-        m_Model.path = ConstructFinalPath(current_node);
-        return;
-     }
-     AddNeighbors(current_node);
+      	if (current_node == end_node) {
+          	//break;
+          	m_Model.path = ConstructFinalPath(current_node);
+            return;
+        }
+        AddNeighbors(current_node);
+    }
+  */
+  	// original solution
+  	while(current_node != end_node) {
+        AddNeighbors(current_node);
+      	current_node = NextNode();
+    }
 
-   }
-
-  //m_Model.path = ConstructFinalPath(current_node);
+  	m_Model.path = ConstructFinalPath(current_node);
 }
